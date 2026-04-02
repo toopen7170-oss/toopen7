@@ -1,0 +1,27 @@
+{
+  "basic": [
+    {"id": "b001", "en": "apple", "ko": "사과", "vi": "quả táo", "zh": "苹果", "ja": "りんご", "es": "manzana", "th": "แอปเปิ้ล", "stage": 1},
+    {"id": "b002", "en": "teacher", "ko": "선생님", "vi": "giáo viên", "zh": "老师", "ja": "先生", "es": "maestro", "th": "ครู", "stage": 1},
+    {"id": "b003", "en": "student", "ko": "학생", "vi": "học sinh", "zh": "学生", "ja": "生徒", "es": "estudiante", "th": "นักเรียน", "stage": 2},
+    {"id": "b004", "en": "school", "ko": "학교", "vi": "trường học", "zh": "学校", "ja": "学校", "es": "escuela", "th": "โรงเรียน", "stage": 2}
+  ],
+  "beginner": [
+    {"id": "be01", "en": "beautiful", "ko": "아름다운", "vi": "đẹp", "zh": "美丽", "ja": "美しい", "es": "hermoso", "th": "สวยงาม", "stage": 1},
+    {"id": "be02", "en": "morning", "ko": "아침", "vi": "buổi sáng", "zh": "早上", "ja": "朝", "es": "mañana", "th": "ตอนเช้า", "stage": 1}
+  ],
+  "intermediate": [
+    {"id": "i001", "en": "experience", "ko": "경험", "vi": "kinh nghiệm", "zh": "经验", "ja": "経験", "es": "experiencia", "th": "ประสบการณ์", "stage": 1}
+  ],
+  "advanced": [
+    {"id": "a001", "en": "environment", "ko": "환경", "vi": "môi trường", "zh": "环境", "ja": "環境", "es": "medio ambiente", "th": "สิ่งแวดล้อม", "stage": 1}
+  ],
+  "expert": [
+    {"id": "e001", "en": "phenomenon", "ko": "현상", "vi": "hiện tượng", "zh": "现象", "ja": "現象", "es": "fenómeno", "th": "ปรากฏการณ์", "stage": 1}
+  ],
+  "master": [
+    {"id": "m001", "en": "metamorphosis", "ko": "탈바꿈", "vi": "sự biến thái", "zh": "蜕变", "ja": "変態", "es": "metamorfosis", "th": "การเปลี่ยนแปลงรูปร่าง", "stage": 1}
+  ],
+  "sentences": [
+    {"id": "s001", "en": "I am a student.", "ko": "나는 학생입니다.", "vi": "Tôi là học sinh.", "zh": "我是学生。", "ja": "私は学生です。", "es": "Soy estudiante.", "th": "ฉันเป็นนักเรียน"}
+  ]
+}
