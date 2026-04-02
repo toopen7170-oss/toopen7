@@ -20,17 +20,14 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          # 최신 우분투(24.04) 환경에 맞춘 라이브러리 수정본
           sudo apt install -y git zip unzip autoconf libtool pkg-config zlib1g-dev \
           libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev \
           openjdk-17-jdk ant python3-pip python3-setuptools python3-dev
-          
           python -m pip install --upgrade pip
           pip install buildozer cython==0.29.33
 
       - name: Build with Buildozer
         run: |
-          # SDK 라이선스 자동 동의 및 빌드 시작
           yes | buildozer android debug
         env:
           ACCEPT_SDK_LICENSE: "yes"
