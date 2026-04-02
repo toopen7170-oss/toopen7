@@ -8,193 +8,153 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
-from kivy.uix.scrollview import ScrollView
 from kivy.clock import Clock
 from kivy.core.window import Window
 from kivy.utils import get_color_from_hex
 from kivy.storage.jsonstore import JsonStore
-from kivy.core.audio import SoundLoader
 
-# 기본 설정: 핸드폰 화면에 꽉 차도록 설정
+# 화면 배경색 및 설정
 Window.clearcolor = get_color_from_hex('#121212')
-
-# 데이터 저장소 설정
-store = JsonStore('user_data.json')
-if not store.exists('profile'):
-    store.put('profile', name='Guest', total_score=0, correct=0, wrong=0, level='basic', stage=1)
-
-# [폰트 해결] 안드로이드에서 한글/외국어 깨짐 방지를 위해 시스템 폰트 경로 설정 가능
-# 기본적으로 Kivy는 나눔고딕 등을 번들링해야 하지만, 여기서는 기본 설정을 유지합니다.
-
-class MainMenu(Screen):
-    def __init__(self, **kw):
-        super().__init__(**kw)
-        layout = BoxLayout(orientation='vertical', padding=20, spacing=15)
-        
-        title = Label(text="외국어 단어 마스터 2.0", font_size='30sp', color=get_color_from_hex('#FFD700'), size_hint_y=0.2)
-        layout.add_widget(title)
-
-        buttons = [
-            ("게임 시작", "game_select"),
-            ("오답 노트", "incorrect_note"),
-            ("단어장", "word_book"),
-            ("명예의 전당", "hall_of_fame"),
-            ("설정/관리", "settings")
-        ]
-
-        for text, screen in buttons:
-            btn = Button(text=text, font_size='20sp', background_color=get_color_from_hex('#1E88E5'))
-            btn.bind(on_release=lambda x, s=screen: self.change_screen(s))
-            layout.add_widget(btn)
-        
-        self.add_widget(layout)
-
-    def change_screen(self, screen_name):
-        self.manager.current = screen_name
-
-class GameSelect(Screen):
-    def __init__(self, **kw):
-        super().__init__(**kw)
-        self.layout = GridLayout(cols=2, padding=20, spacing=20)
-        
-        levels = [
-            ("기초 (4칸)", "basic"),
-            ("초급 (6칸)", "beginner"),
-            ("중급 (9칸)", "intermediate"),
-            ("고급 (16칸)", "advanced"),
-            ("최상급", "expert"),
-            ("마스터", "master")
-        ]
-
-        for text, level_id in levels:
-            btn = Button(text=text, font_size='18sp', background_color=get_color_from_hex('#43A047'))
-            btn.bind(on_release=lambda x, l=level_id: self.start_game(l))
-            self.layout.add_widget(btn)
-            
-        back_btn = Button(text="뒤로가기", size_hint_y=0.2)
-        back_btn.bind(on_release=lambda x: self.change_screen("main_menu"))
-        
-        root = BoxLayout(orientation='vertical')
-        root.add_widget(self.layout)
-        root.add_widget(back_btn)
-        self.add_widget(root)
-
-    def start_game(self, level):
-        # 단계별 잠금 로직 적용 지점
-        self.manager.get_screen('quiz_screen').current_level = level
-        self.manager.current = 'quiz_screen'
-
-    def change_screen(self, name):
-        self.manager.current = name
 
 class QuizScreen(Screen):
     def __init__(self, **kw):
         super().__init__(**kw)
         self.hearts = 5
+        self.max_hearts = 5
         self.current_level = "basic"
         self.stage = 1
-        self.layout = BoxLayout(orientation='vertical', padding=10)
+        self.correct_count = 0
+        self.wrong_count = 0
+        self.words_data = {}
+        self.load_data()
         
-        # 상단 바 (하트, 점수)
-        self.top_bar = BoxLayout(size_hint_y=0.1)
-        self.heart_label = Label(text="❤️❤️❤️❤️❤️", font_size='20sp')
-        self.score_label = Label(text="정답: 0  오답: 0", font_size='18sp')
-        self.top_bar.add_widget(self.heart_label)
-        self.top_bar.add_widget(self.score_label)
+        # 메인 레이아웃
+        self.layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
         
-        # 문제 영역
-        self.question_label = Label(text="문제를 생성 중...", font_size='24sp', size_hint_y=0.2)
+        # 상단 정보창 (하트, 점수)
+        self.top_info = BoxLayout(size_hint_y=0.1)
+        self.heart_label = Label(text="❤️❤️❤️❤️❤️", font_size='22sp', color=(1,0,0,1))
+        self.score_label = Label(text="정답: 0 | 오답: 0", font_size='18sp')
+        self.top_info.add_widget(self.heart_label)
+        self.top_info.add_widget(self.score_label)
         
-        # 선택지 영역
-        self.options_layout = GridLayout(cols=2, spacing=10)
+        # 문제 출력창
+        self.question_box = BoxLayout(orientation='vertical', size_hint_y=0.3)
+        self.level_label = Label(text="기초 단계", font_size='16sp', color=(0.7,0.7,0.7,1))
+        self.word_label = Label(text="준비 중...", font_size='32sp', bold=True)
+        self.question_box.add_widget(self.level_label)
+        self.question_box.add_widget(self.word_label)
         
-        # 하단 버튼
+        # 선택지 버튼 창
+        self.options_grid = GridLayout(cols=2, spacing=10, size_hint_y=0.5)
+        
+        # 하단 컨트롤 바
         self.nav_bar = BoxLayout(size_hint_y=0.1, spacing=5)
-        self.nav_bar.add_widget(Button(text="일시정지", on_release=self.toggle_pause))
-        self.nav_bar.add_widget(Button(text="종료", on_release=self.exit_game))
+        self.nav_bar.add_widget(Button(text="일시정지", background_color=(0.3,0.3,0.3,1), on_release=self.toggle_pause))
+        self.nav_bar.add_widget(Button(text="종료", background_color=(0.8,0.2,0.2,1), on_release=self.go_back))
         
-        # 숨은 하트 충전 버튼 (초기엔 투명)
-        self.hidden_refill_btn = Button(text="하트충전", size_hint=(None, None), size=(100, 50), opacity=0)
-        self.hidden_refill_btn.bind(on_release=self.refill_hearts)
-
-        self.layout.add_widget(self.top_bar)
-        self.layout.add_widget(self.question_label)
-        self.layout.add_widget(self.options_layout)
+        self.layout.add_widget(self.top_info)
+        self.layout.add_widget(self.question_box)
+        self.layout.add_widget(self.options_grid)
         self.layout.add_widget(self.nav_bar)
+        
         self.add_widget(self.layout)
         
-        self.paused = False
+        # 숨은 하트 버튼 (평소엔 안보임)
+        self.hidden_btn = Button(text="❤️+", size_hint=(None, None), size=(60, 60), 
+                                 pos_hint={'right': 1, 'bottom': 1}, opacity=0)
+        self.hidden_btn.bind(on_release=self.refill_hearts)
+        self.add_widget(self.hidden_btn)
+
+    def load_data(self):
+        try:
+            with open('words.json', 'r', encoding='utf-8') as f:
+                self.words_data = json.load(f)
+        except:
+            self.words_data = {"basic": [{"en":"apple", "ko":"사과"}]}
 
     def on_enter(self):
-        self.load_next_question()
+        self.next_question()
 
-    def load_next_question(self):
-        self.options_layout.clear_widgets()
-        # 여기에 단어 로직 (랜덤 선택) 추가
-        # 예시 데이터
-        q_word = "Apple"
-        correct_ans = "사과"
-        options = ["사과", "포도", "바나나", "수박"]
+    def next_question(self):
+        self.options_grid.clear_widgets()
+        level_list = self.words_data.get(self.current_level, [])
+        if not level_list: return
+        
+        target = random.choice(level_list)
+        correct_ans = target['ko']
+        self.word_label.text = target['en'] # 여기에 발음 기능 연동 가능
+        
+        # 4지선다 만들기
+        options = [correct_ans]
+        all_ko = [w['ko'] for w in level_list if w['ko'] != correct_ans]
+        options += random.sample(all_ko, min(len(all_ko), 3))
         random.shuffle(options)
-
-        self.question_label.text = f"단어를 듣고 맞추세요\n(발음 재생 중...)"
-        # 발음 재생 코드 (TTS 또는 오디오 파일)
         
         for opt in options:
-            btn = Button(text=opt, font_size='18sp')
-            btn.bind(on_release=lambda x, a=opt: self.check_answer(a, correct_ans))
-            self.options_layout.add_widget(btn)
+            btn = Button(text=opt, font_size='20sp', background_color=(0.2,0.5,0.8,1))
+            btn.bind(on_release=lambda x, a=opt, c=correct_ans: self.check_answer(a, c))
+            self.options_grid.add_widget(btn)
 
     def check_answer(self, user_ans, correct_ans):
         if user_ans == correct_ans:
-            # 정답 처리
-            self.show_popup("O", "정답입니다!")
-            self.load_next_question()
+            self.correct_count += 1
+            self.show_popup("정답!", "O", (0,1,0,1))
         else:
-            # 오답 처리
+            self.wrong_count += 1
             self.hearts -= 1
-            self.update_hearts()
-            self.show_popup("X", "외때려! 틀렸습니다.")
-            if self.hearts <= 0:
-                self.exit_game()
-            else:
-                self.load_next_question()
+            self.show_popup("오답!", "외때려! X", (1,0,0,1))
+            self.update_hearts_ui()
+            
+        self.score_label.text = f"정답: {self.correct_count} | 오답: {self.wrong_count}"
+        if self.hearts > 0:
+            self.next_question()
+        else:
+            self.go_back()
 
-    def update_hearts(self):
+    def update_hearts_ui(self):
         self.heart_label.text = "❤️" * self.hearts
-        if self.hearts == 1:
-            self.hidden_refill_btn.opacity = 1
-            self.layout.add_widget(self.hidden_refill_btn)
+        self.hidden_btn.opacity = 1 if self.hearts == 1 else 0
 
     def refill_hearts(self, instance):
         self.hearts = 5
-        self.update_hearts()
-        self.hidden_refill_btn.opacity = 0
-        self.layout.remove_widget(self.hidden_refill_btn)
+        self.update_hearts_ui()
 
     def toggle_pause(self, instance):
-        self.paused = not self.paused
-        # 일시 정지 로직
+        pass # 일시정지 로직
 
-    def exit_game(self, instance=None):
+    def go_back(self, instance=None):
         self.manager.current = 'main_menu'
 
-    def show_popup(self, title, msg):
-        content = Button(text=msg)
-        popup = Popup(title=title, content=content, size_hint=(0.6, 0.4))
-        content.bind(on_release=popup.dismiss)
-        popup.open()
+    def show_popup(self, title, msg, color):
+        p = Popup(title=title, content=Label(text=msg, font_size='20sp', color=color), size_hint=(0.7, 0.4))
+        p.open()
+        Clock.schedule_once(lambda dt: p.dismiss(), 0.8)
 
-# 나머지 화면 클래스 (명예의전당, 오답노트 등)는 위 구조와 유사하게 구현됩니다.
+class MainMenu(Screen):
+    def __init__(self, **kw):
+        super().__init__(**kw)
+        layout = BoxLayout(orientation='vertical', padding=50, spacing=20)
+        layout.add_widget(Label(text="단어 맞추기 2.0", font_size='40sp', bold=True))
+        
+        start_btn = Button(text="게임 시작", size_hint_y=0.2, background_color=(0.1, 0.7, 0.3, 1))
+        start_btn.bind(on_release=self.start)
+        layout.add_widget(start_btn)
+        
+        exit_btn = Button(text="종료", size_hint_y=0.2)
+        exit_btn.bind(on_release=lambda x: App.get_running_app().stop())
+        layout.add_widget(exit_btn)
+        self.add_widget(layout)
 
-class WordGameApp(App):
+    def start(self, instance):
+        self.manager.current = 'quiz_screen'
+
+class WordApp(App):
     def build(self):
         sm = ScreenManager(transition=FadeTransition())
         sm.add_widget(MainMenu(name='main_menu'))
-        sm.add_widget(GameSelect(name='game_select'))
         sm.add_widget(QuizScreen(name='quiz_screen'))
-        # 추가 화면들 등록...
         return sm
 
 if __name__ == '__main__':
-    WordGameApp().run()
+    WordApp().run()
