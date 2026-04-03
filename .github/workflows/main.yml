@@ -6,12 +6,17 @@ on:
 
 jobs:
   build:
-    # OS를 22.04로 변경하여 라이브러리 충돌을 방지합니다.
     runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -23,14 +28,15 @@ jobs:
           sudo apt update
           sudo apt install -y git zip unzip autoconf libtool pkg-config zlib1g-dev \
           libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev \
-          openjdk-17-jdk ant python3-pip python3-setuptools python3-dev build-essential
+          ant python3-pip python3-setuptools python3-dev build-essential
 
           python -m pip install --upgrade pip
           pip install buildozer cython==0.29.33
 
       - name: Build with Buildozer
         run: |
-          # 라이선스 자동 승인 및 빌드 시작
+          # 빌드 도구들이 자바 17을 정확히 바라보게 설정
+          export JAVA_HOME=$JAVA_HOME_17_X64
           yes | buildozer android debug
         env:
           ACCEPT_SDK_LICENSE: "yes"
