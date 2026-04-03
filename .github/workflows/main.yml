@@ -29,8 +29,7 @@ jobs:
 
       - name: Build with Buildozer
         run: |
-          # 캐시 충돌 방지를 위해 기존 빌드 초기화 후 진행
-          buildozer android clean
+          # clean 명령어 제거 (서버가 깨끗하므로 필요 없음)
           yes | buildozer android debug
         env:
           ACCEPT_SDK_LICENSE: "yes"
