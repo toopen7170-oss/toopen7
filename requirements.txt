@@ -1,3 +1,5 @@
-kivy
-kivymd
+kivy==2.3.0
+pyjnius
 requests
+certifi
+urllib3
