@@ -29,7 +29,7 @@ jobs:
 
       - name: Build with Buildozer
         run: |
-          # clean 명령어 제거 (서버가 깨끗하므로 필요 없음)
+          # 오류가 났던 clean 명령어를 아예 삭제했습니다.
           yes | buildozer android debug
         env:
           ACCEPT_SDK_LICENSE: "yes"
