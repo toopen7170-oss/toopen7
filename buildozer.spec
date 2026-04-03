@@ -4,16 +4,15 @@ package.name = wordgame
 package.domain = org.test
 source.dir = .
 source.include_exts = py,png,jpg,kv,atlas,json,csv,wav,mp3
-version = 0.1
+version = 0.1.1
 
-# 빌드 안정성을 위해 라이브러리 목록 최적화
+# 최신 규격에 맞게 archs로 수정
 requirements = python3,kivy==2.3.0,requests,android,certifi
-
 orientation = portrait
 fullscreen = 1
-android.arch = arm64-v8a
+android.archs = arm64-v8a
 
-# 빌드 오류 방지를 위한 API 및 NDK 설정
+# 안정적인 빌드 설정
 android.api = 33
 android.minapi = 21
 android.ndk = 25b
