@@ -4,6 +4,10 @@ package.name = wordgame
 package.domain = org.test
 source.dir = .
 source.include_exts = py,png,jpg,kv,atlas,json,csv,wav,mp3
+
+# 버전을 반드시 입력해야 에러가 나지 않습니다.
+version = 0.1
+
 requirements = python3,kivy,requests,android
 orientation = portrait
 fullscreen = 1
