@@ -1,27 +1,110 @@
 {
-  "basic": [
-    {"id": "b001", "en": "apple", "ko": "사과", "vi": "quả táo", "zh": "苹果", "ja": "りんご", "es": "manzana", "th": "แอปเปิ้ล", "stage": 1},
-    {"id": "b002", "en": "teacher", "ko": "선생님", "vi": "giáo viên", "zh": "老师", "ja": "先生", "es": "maestro", "th": "ครู", "stage": 1},
-    {"id": "b003", "en": "student", "ko": "학생", "vi": "học sinh", "zh": "学生", "ja": "生徒", "es": "estudiante", "th": "นักเรียน", "stage": 2},
-    {"id": "b004", "en": "school", "ko": "학교", "vi": "trường học", "zh": "学校", "ja": "学校", "es": "escuela", "th": "โรงเรียน", "stage": 2}
-  ],
-  "beginner": [
-    {"id": "be01", "en": "beautiful", "ko": "아름다운", "vi": "đẹp", "zh": "美丽", "ja": "美しい", "es": "hermoso", "th": "สวยงาม", "stage": 1},
-    {"id": "be02", "en": "morning", "ko": "아침", "vi": "buổi sáng", "zh": "早上", "ja": "朝", "es": "mañana", "th": "ตอนเช้า", "stage": 1}
-  ],
-  "intermediate": [
-    {"id": "i001", "en": "experience", "ko": "경험", "vi": "kinh nghiệm", "zh": "经验", "ja": "経験", "es": "experiencia", "th": "ประสบการณ์", "stage": 1}
-  ],
-  "advanced": [
-    {"id": "a001", "en": "environment", "ko": "환경", "vi": "môi trường", "zh": "环境", "ja": "環境", "es": "medio ambiente", "th": "สิ่งแวดล้อม", "stage": 1}
-  ],
-  "expert": [
-    {"id": "e001", "en": "phenomenon", "ko": "현상", "vi": "hiện tượng", "zh": "现象", "ja": "現象", "es": "fenómeno", "th": "ปรากฏการณ์", "stage": 1}
-  ],
-  "master": [
-    {"id": "m001", "en": "metamorphosis", "ko": "탈바꿈", "vi": "sự biến thái", "zh": "蜕变", "ja": "変態", "es": "metamorfosis", "th": "การเปลี่ยนแปลงรูปร่าง", "stage": 1}
-  ],
-  "sentences": [
-    {"id": "s001", "en": "I am a student.", "ko": "나는 학생입니다.", "vi": "Tôi là học sinh.", "zh": "我是学生。", "ja": "私は学生です。", "es": "Soy estudiante.", "th": "ฉันเป็นนักเรียน"}
+  "기초": {
+    "1": [
+      {"en": "father", "vi": "cha", "ko": "아버지", "zh": "爸爸", "ja": "父"},
+      {"en": "mother", "vi": "mẹ", "ko": "어머니", "zh": "妈妈", "ja": "母"},
+      {"en": "son", "vi": "con trai", "ko": "아들", "zh": "儿子", "ja": "息子"},
+      {"en": "daughter", "vi": "con gái", "ko": "딸", "zh": "女儿", "ja": "娘"},
+      {"en": "brother", "vi": "anh em trai", "ko": "형제", "zh": "兄弟", "ja": "兄弟"},
+      {"en": "sister", "vi": "chị em gái", "ko": "자매", "zh": "姐妹", "ja": "姉妹"},
+      {"en": "grandfather", "vi": "ông", "ko": "할아버지", "zh": "爷爷", "ja": "祖父"},
+      {"en": "grandmother", "vi": "bà", "ko": "할머니", "zh": "奶奶", "ja": "祖母"},
+      {"en": "head", "vi": "đầu", "ko": "머리", "zh": "头", "ja": "頭"},
+      {"en": "eye", "vi": "mắt", "ko": "눈", "zh": "眼睛", "ja": "目"},
+      {"en": "nose", "vi": "mũi", "ko": "코", "zh": "鼻子", "ja": "鼻"},
+      {"en": "mouth", "vi": "miệng", "ko": "입", "zh": "嘴", "ja": "口"},
+      {"en": "ear", "vi": "tai", "ko": "귀", "zh": "耳朵", "ja": "耳"},
+      {"en": "hand", "vi": "tay", "ko": "손", "zh": "手", "ja": "手"},
+      {"en": "foot", "vi": "chân", "ko": "발", "zh": "脚", "ja": "足"},
+      {"en": "water", "vi": "nước", "ko": "물", "zh": "水", "ja": "水"},
+      {"en": "food", "vi": "thức ăn", "ko": "음식", "zh": "食物", "ja": "食べ物"},
+      {"en": "rice", "vi": "cơm", "ko": "밥", "zh": "米饭", "ja": "ご飯"},
+      {"en": "bread", "vi": "bánh mì", "ko": "빵", "zh": "面包", "ja": "パン"},
+      {"en": "milk", "vi": "sữa", "ko": "우유", "zh": "牛奶", "ja": "牛乳"},
+      {"en": "meat", "vi": "thịt", "ko": "고기", "zh": "肉", "ja": "肉"},
+      {"en": "egg", "vi": "trứng", "ko": "계란", "zh": "鸡蛋", "ja": "卵"},
+      {"en": "fruit", "vi": "trái cây", "ko": "과일", "zh": "水果", "ja": "果物"},
+      {"en": "house", "vi": "nhà", "ko": "집", "zh": "房子", "ja": "家"},
+      {"en": "room", "vi": "phòng", "ko": "방", "zh": "房间", "ja": "部屋"},
+      {"en": "school", "vi": "trường học", "ko": "학교", "zh": "学校", "ja": "学校"},
+      {"en": "teacher", "vi": "giáo viên", "ko": "선생님", "zh": "老师", "ja": "先生"},
+      {"en": "student", "vi": "học sinh", "ko": "학생", "zh": "学生", "ja": "学生"},
+      {"en": "friend", "vi": "bạn bè", "ko": "친구", "zh": "朋友", "ja": "友達"},
+      {"en": "name", "vi": "tên", "ko": "이름", "zh": "名字", "ja": "名前"},
+      {"en": "sun", "vi": "mặt trời", "ko": "해", "zh": "太阳", "ja": "太陽"},
+      {"en": "moon", "vi": "mặt trăng", "ko": "달", "zh": "月亮", "ja": "月"},
+      {"en": "star", "vi": "ngôi sao", "ko": "별", "zh": "星星", "ja": "星"},
+      {"en": "sky", "vi": "bầu trời", "ko": "하늘", "zh": "天空", "ja": "空"},
+      {"en": "tree", "vi": "cây", "ko": "나무", "zh": "树", "ja": "木"},
+      {"en": "flower", "vi": "hoa", "ko": "꽃", "zh": "花", "ja": "花"},
+      {"en": "dog", "vi": "con chó", "ko": "개", "zh": "狗", "ja": "犬"},
+      {"en": "cat", "vi": "con mèo", "ko": "고양이", "zh": "猫", "ja": "猫"},
+      {"en": "bird", "vi": "con chim", "ko": "새", "zh": "鸟", "ja": "鳥"},
+      {"en": "fish", "vi": "con cá", "ko": "물고기", "zh": "鱼", "ja": "魚"},
+      {"en": "car", "vi": "xe hơi", "ko": "자동차", "zh": "汽车", "ja": "車"},
+      {"en": "bus", "vi": "xe buýt", "ko": "버스", "zh": "公共汽车", "ja": "バス"},
+      {"en": "time", "vi": "thời gian", "ko": "시간", "zh": "时间", "ja": "時間"},
+      {"en": "day", "vi": "ngày", "ko": "일", "zh": "天", "ja": "日"},
+      {"en": "night", "vi": "đêm", "ko": "밤", "zh": "夜晚", "ja": "夜"},
+      {"en": "morning", "vi": "buổi sáng", "ko": "아침", "zh": "早上", "ja": "朝"},
+      {"en": "man", "vi": "đàn ông", "ko": "남자", "zh": "男人", "ja": "男"},
+      {"en": "woman", "vi": "phụ nữ", "ko": "여자", "zh": "女人", "ja": "女"},
+      {"en": "child", "vi": "trẻ em", "ko": "아이", "zh": "孩子", "ja": "子供"},
+      {"en": "clothes", "vi": "quần áo", "ko": "옷", "zh": "衣服", "ja": "服"}
+    ]
+  }
+}
+{
+  "2": [
+    {"en": "one", "vi": "một", "ko": "일(하나)", "zh": "一", "ja": "一"},
+    {"en": "two", "vi": "hai", "ko": "이(둘)", "zh": "二", "ja": "二"},
+    {"en": "three", "vi": "ba", "ko": "삼(셋)", "zh": "三", "ja": "三"},
+    {"en": "four", "vi": "bốn", "ko": "사(넷)", "zh": "四", "ja": "四"},
+    {"en": "five", "vi": "năm", "ko": "오(다섯)", "zh": "五", "ja": "五"},
+    {"en": "six", "vi": "sáu", "ko": "육(여섯)", "zh": "六", "ja": "六"},
+    {"en": "seven", "vi": "bảy", "ko": "칠(일곱)", "zh": "七", "ja": "七"},
+    {"en": "eight", "vi": "tám", "ko": "팔(여덟)", "zh": "八", "ja": "八"},
+    {"en": "nine", "vi": "chín", "ko": "구(아홉)", "zh": "九", "ja": "九"},
+    {"en": "ten", "vi": "mười", "ko": "십(열)", "zh": "十", "ja": "十"},
+    {"en": "Monday", "vi": "Thứ Hai", "ko": "월요일", "zh": "星期一", "ja": "月曜日"},
+    {"en": "Tuesday", "vi": "Thứ Ba", "ko": "화요일", "zh": "星期二", "ja": "火曜日"},
+    {"en": "Wednesday", "vi": "Thứ Tư", "ko": "수요일", "zh": "星期三", "ja": "水曜日"},
+    {"en": "Thursday", "vi": "Thứ Năm", "ko": "목요일", "zh": "星期四", "ja": "木曜日"},
+    {"en": "Friday", "vi": "Thứ Sáu", "ko": "금요일", "zh": "星期五", "ja": "金曜日"},
+    {"en": "Saturday", "vi": "Thứ Bảy", "ko": "토요일", "zh": "星期六", "ja": "土曜日"},
+    {"en": "Sunday", "vi": "Chủ Nhật", "ko": "일요일", "zh": "星期日", "ja": "日曜日"},
+    {"en": "red", "vi": "màu đỏ", "ko": "빨간색", "zh": "红色", "ja": "赤"},
+    {"en": "blue", "vi": "màu xanh dương", "ko": "파란색", "zh": "蓝色", "ja": "青"},
+    {"en": "green", "vi": "màu xanh lá", "ko": "초록색", "zh": "绿色", "ja": "緑"},
+    {"en": "yellow", "vi": "màu vàng", "ko": "노란색", "zh": "黄色", "ja": "黄色"},
+    {"en": "black", "vi": "màu đen", "ko": "검정색", "zh": "黑色", "ja": "黒"},
+    {"en": "white", "vi": "màu trắng", "ko": "하얀색", "zh": "白色", "ja": "白"},
+    {"en": "eat", "vi": "ăn", "ko": "먹다", "zh": "吃", "ja": "食べる"},
+    {"en": "drink", "vi": "uống", "ko": "마시다", "zh": "喝", "ja": "飲む"},
+    {"en": "sleep", "vi": "ngủ", "ko": "자다", "zh": "睡觉", "ja": "寝る"},
+    {"en": "go", "vi": "đi", "ko": "가다", "zh": "去", "ja": "行く"},
+    {"en": "come", "vi": "đến", "ko": "오다", "zh": "来", "ja": "来る"},
+    {"en": "see", "vi": "nhìn", "ko": "보다", "zh": "看", "ja": "見る"},
+    {"en": "hear", "vi": "nghe", "ko": "듣다", "zh": "听", "ja": "聞く"},
+    {"en": "speak", "vi": "nói", "ko": "말하다", "zh": "说话", "ja": "話す"},
+    {"en": "read", "vi": "đọc", "ko": "읽다", "zh": "读", "ja": "読む"},
+    {"en": "write", "vi": "viết", "ko": "쓰다", "zh": "写", "ja": "書く"},
+    {"en": "buy", "vi": "mua", "ko": "사다", "zh": "买", "ja": "買う"},
+    {"en": "sell", "vi": "bán", "ko": "팔다", "zh": "卖", "ja": "売る"},
+    {"en": "give", "vi": "cho", "ko": "주다", "zh": "给", "ja": "与える"},
+    {"en": "take", "vi": "lấy", "ko": "받다/취하다", "zh": "拿", "ja": "取る"},
+    {"en": "laugh", "vi": "cười", "ko": "웃다", "zh": "笑", "ja": "笑う"},
+    {"en": "cry", "vi": "khóc", "ko": "울다", "zh": "哭", "ja": "泣く"},
+    {"en": "hot", "vi": "nóng", "ko": "덥다/뜨겁다", "zh": "热", "ja": "暑い"},
+    {"en": "cold", "vi": "lạnh", "ko": "춥다/차갑다", "zh": "冷", "ja": "寒い"},
+    {"en": "big", "vi": "lớn", "ko": "크다", "zh": "大", "ja": "大きい"},
+    {"en": "small", "vi": "nhỏ", "ko": "작다", "zh": "小", "ja": "小さい"},
+    {"en": "good", "vi": "tốt", "ko": "좋다", "zh": "好", "ja": "良い"},
+    {"en": "bad", "vi": "xấu", "ko": "나쁘다", "zh": "坏", "ja": "悪い"},
+    {"en": "fast", "vi": "nhanh", "ko": "빠르다", "zh": "快", "ja": "速い"},
+    {"en": "slow", "vi": "chậm", "ko": "느리다", "zh": "慢", "ja": "遅い"},
+    {"en": "love", "vi": "yêu", "ko": "사랑하다", "zh": "爱", "ja": "愛する"},
+    {"en": "happy", "vi": "hạnh phúc", "ko": "행복하다", "zh": "快乐", "ja": "幸せ"},
+    {"en": "sad", "vi": "buồn", "ko": "슬프다", "zh": "悲伤", "ja": "悲しい"}
   ]
 }
