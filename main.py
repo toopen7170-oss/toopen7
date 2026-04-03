@@ -1,36 +1,48 @@
 import os
+import sys
 from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.core.text import LabelBase
-from kivy.core.window import Window
+from kivy.resources import resource_add_path
 
-# [중요] 한글 폰트 등록 (font.ttf 파일이 프로젝트 폴더에 있어야 함)
-# 만약 다운로드한 폰트 이름이 다르면 아래 'font.ttf' 부분을 파일 이름과 똑같이 수정하세요.
+# [중요] 안드로이드 앱 내부 경로 인식 설정
 try:
-    LabelBase.register(name="Nanum", fn_regular="font.ttf")
+    if getattr(sys, 'frozen', False):
+        # 빌드된 환경일 경우
+        base_path = os.path.dirname(sys.executable)
+    else:
+        # 일반 실행 환경일 경우
+        base_path = os.path.dirname(__file__)
+    
+    resource_add_path(base_path)
+    
+    # 폰트 등록 (오류 방지를 위해 파일 존재 확인 추가)
+    font_file = "font.ttf"
+    if os.path.exists(font_file):
+        LabelBase.register(name="Nanum", fn_regular=font_file)
+    else:
+        print(f"Font file not found: {font_file}")
 except Exception as e:
-    print(f"Font registration failed: {e}")
+    print(f"Font setup error: {e}")
 
 class WordGameApp(App):
     def build(self):
-        # 전체 앱의 기본 폰트를 등록한 폰트로 고정
-        self.title = "한글 단어 게임"
-        
         layout = BoxLayout(orientation='vertical', padding=20, spacing=20)
         
-        # 폰트 적용 예시 (font_name="Nanum" 추가)
+        # 폰트가 없을 경우를 대비해 기본 폰트 설정
+        f_name = "Nanum" if os.path.exists("font.ttf") else None
+        
         main_label = Label(
             text="단어 맞히기 게임 2.0", 
             font_size='30sp', 
-            font_name="Nanum",
+            font_name=f_name,
             size_hint_y=0.2
         )
         layout.add_widget(main_label)
         
-        # 단어 표시 영역
         word_display = Label(
             text="teacher", 
             font_size='50sp', 
@@ -39,29 +51,19 @@ class WordGameApp(App):
         )
         layout.add_widget(word_display)
         
-        # 정답 버튼 영역 (2x2 그리드)
         grid = GridLayout(cols=2, spacing=10, size_hint_y=0.4)
         answers = ["선생님", "학생", "학교", "교실"]
         
         for ans in answers:
             btn = Button(
                 text=ans, 
-                font_name="Nanum", 
+                font_name=f_name, 
                 font_size='20sp',
                 background_color=(0.1, 0.3, 0.5, 1)
             )
             grid.add_widget(btn)
             
         layout.add_widget(grid)
-        
-        # 하단 메뉴 버튼
-        bottom_btn = Button(
-            text="다음 문제", 
-            font_name="Nanum", 
-            size_hint_y=0.1,
-            background_color=(0.2, 0.5, 0.2, 1)
-        )
-        layout.add_widget(bottom_btn)
         
         return layout
 
