@@ -15,19 +15,22 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.9'
+          python-version: '3.10'
 
-      - name: Install dependencies
+      - name: Install system dependencies
         run: |
           sudo apt update
           sudo apt install -y git zip unzip autoconf libtool pkg-config zlib1g-dev \
           libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev \
-          openjdk-17-jdk ant python3-pip python3-setuptools python3-dev
+          openjdk-17-jdk ant python3-pip python3-setuptools python3-dev build-essential
+
           python -m pip install --upgrade pip
           pip install buildozer cython==0.29.33
 
       - name: Build with Buildozer
         run: |
+          # 캐시 충돌 방지를 위해 기존 빌드 초기화 후 진행
+          buildozer android clean
           yes | buildozer android debug
         env:
           ACCEPT_SDK_LICENSE: "yes"
