@@ -6,7 +6,8 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # OS를 22.04로 변경하여 라이브러리 충돌을 방지합니다.
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout code
@@ -29,7 +30,7 @@ jobs:
 
       - name: Build with Buildozer
         run: |
-          # 오류가 났던 clean 명령어를 아예 삭제했습니다.
+          # 라이선스 자동 승인 및 빌드 시작
           yes | buildozer android debug
         env:
           ACCEPT_SDK_LICENSE: "yes"
