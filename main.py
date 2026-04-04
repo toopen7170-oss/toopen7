@@ -9,237 +9,144 @@ from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.core.text import LabelBase
-
-# [기능 개선] 안드로이드 발음(TTS) 기능을 위한 라이브러리 임포트
-# PC에서 테스트할 때는 작동하지 않지만, APK로 만들면 작동합니다.
 from kivy.utils import platform
-if platform == 'android':
-    from android.tts import TTS
-    android_tts = TTS()
-else:
-    android_tts = None
 
-# [1단계 완료] 폰트 등록 (폰트 깨짐 해결)
-# 파일 목록에 'font.ttf'가 반드시 있어야 합니다.
+# 파일 경로 설정 (팅김 방지 핵심)
+BASE_PATH = os.path.dirname(os.path.abspath(__file__))
+STORE_FILE = os.path.join(BASE_PATH, 'words.json')
+FONT_PATH = os.path.join(BASE_PATH, 'font.ttf')
+
+# 1단계: 폰트 등록 (1번 사진 깨짐 해결)
 try:
-    LabelBase.register(name="Nanum", fn_regular="font.ttf")
+    LabelBase.register(name="Nanum", fn_regular=FONT_PATH)
 except Exception as e:
-    print(f"폰트 등록 실패: {e}. 'font.ttf' 파일을 확인하세요.")
+    print(f"폰트 로드 실패: {e}")
 
-STORE_FILE = 'words.json'
-
-# 전역 변수로 현재 학습 중인 단어 목록 저장
-current_word_list = []
+# 안드로이드 발음(TTS) 설정
+if platform == 'android':
+    try:
+        from jnius import autoclass
+        Locale = autoclass('java.util.Locale')
+        TextToSpeech = autoclass('android.speech.tts.TextToSpeech')
+        PythonActivity = autoclass('org.kivy.android.PythonActivity')
+    except:
+        pass
 
 class MainMenu(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # [복원] 프리스톤테일 메뉴를 지우고 학습 앱 메뉴로 복원
         layout = BoxLayout(orientation='vertical', padding=30, spacing=20)
+        layout.add_widget(Label(text="다국어 단어 마스터 2.0", font_name="Nanum", font_size='30sp'))
         
-        # 타이틀 (폰트 적용)
-        layout.add_widget(Label(text="다국어 단어 마스터 2.0", font_name="Nanum", font_size='30sp', size_hint_y=None, height='100dp'))
-        
-        btns = [
-            ("학습 시작하기 (단어 게임)", "lang_select"),
-            ("단어장 관리 (추가/삭제)", "admin")
-        ]
-        for text, target in btns:
+        for text, target in [("학습 시작하기", "lang_select"), ("단어장 관리", "admin")]:
             btn = Button(text=text, font_name="Nanum", size_hint_y=None, height='70dp')
             btn.bind(on_release=lambda x, t=target: setattr(self.manager, 'current', t))
             layout.add_widget(btn)
-        
         self.add_widget(layout)
 
 class LangSelect(Screen):
-    # [2단계 수리] 외국어 버튼 작동 불능 해결 (6번 사진 대응)
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         layout = BoxLayout(orientation='vertical', padding=40, spacing=15)
         layout.add_widget(Label(text="목표 언어를 선택하세요", font_name="Nanum", font_size='25sp'))
         
-        langs = [("English", "en"), ("Vietnamese", "vi"), ("Chinese", "zh"), ("Japanese", "ja")]
-        for name, code in langs:
-            # 버튼에도 폰트 적용
+        for name, code in [("English", "en"), ("Vietnamese", "vi"), ("Chinese", "zh")]:
             btn = Button(text=name, font_name="Nanum", size_hint_y=None, height='60dp')
-            # [수정] 버튼을 누르면 start_learning 함수가 호출되도록 바인딩
             btn.bind(on_release=lambda x, c=code: self.start_learning(c))
             layout.add_widget(btn)
-            
-        back_btn = Button(text="메인으로", font_name="Nanum", size_hint_y=None, height='50dp', background_color=(0.5, 0.5, 0.5, 1))
-        back_btn.bind(on_release=lambda x: setattr(self.manager, 'current', 'menu'))
-        layout.add_widget(back_btn)
+        
+        back = Button(text="뒤로가기", font_name="Nanum", size_hint_y=None, height='50dp')
+        back.bind(on_release=lambda x: setattr(self.manager, 'current', 'menu'))
+        layout.add_widget(back)
         self.add_widget(layout)
 
-    def start_learning(self, lang_code):
-        # 학습할 언어를 매니저에 저장하고 게임 화면으로 이동
-        self.manager.target_lang = lang_code
+    def start_learning(self, code):
+        self.manager.target_lang = code
         self.manager.current = 'game'
 
 class AdminScreen(Screen):
-    # [복원] 프리스톤테일 관리 화면을 단어 관리 화면으로 복원
     def on_enter(self):
         self.refresh()
 
     def refresh(self):
         self.clear_widgets()
-        main_layout = BoxLayout(orientation='vertical', padding=10, spacing=5)
-        
-        # 입력 필드 (폰트 적용)
-        input_layout = GridLayout(cols=2, spacing=10, size_hint_y=None, height='200dp')
+        layout = BoxLayout(orientation='vertical', padding=10, spacing=5)
         self.inputs = {
-            'level': TextInput(hint_text="등급 (초급/중급/상급)", font_name="Nanum", multiline=False),
-            'step': TextInput(hint_text="단계 (1~10)", multiline=False),
-            'ko': TextInput(hint_text="한국어 뜻", font_name="Nanum", multiline=False),
-            'en': TextInput(hint_text="영어 단어", multiline=False),
-            'vi': TextInput(hint_text="베트남어 단어", multiline=False),
-            'zh': TextInput(hint_text="중국어 단어", multiline=False)
+            'level': TextInput(hint_text="등급", font_name="Nanum", multiline=False),
+            'ko': TextInput(hint_text="한국어", font_name="Nanum", multiline=False),
+            'en': TextInput(hint_text="영어", multiline=False),
+            'vi': TextInput(hint_text="베트남어", multiline=False)
         }
-        for i in self.inputs.values(): input_layout.add_widget(i)
-        main_layout.add_widget(input_layout)
+        for i in self.inputs.values(): layout.add_widget(i)
 
-        # 버튼 바
         btn_box = BoxLayout(size_hint_y=None, height='60dp', spacing=10)
-        save_btn = Button(text="단어 저장", font_name="Nanum", background_color=(0, 0.7, 0, 1))
-        save_btn.bind(on_release=self.save_word)
-        back_btn = Button(text="닫기", font_name="Nanum")
-        back_btn.bind(on_release=lambda x: setattr(self.manager, 'current', 'menu'))
+        save = Button(text="저장", font_name="Nanum", background_color=(0, 0.7, 0, 1))
+        save.bind(on_release=self.save_word)
+        back = Button(text="닫기", font_name="Nanum")
+        back.bind(on_release=lambda x: setattr(self.manager, 'current', 'menu'))
         
-        btn_box.add_widget(save_btn)
-        btn_box.add_widget(back_btn)
-        main_layout.add_widget(btn_box)
-        self.add_widget(main_layout)
+        btn_box.add_widget(save); btn_box.add_widget(back)
+        layout.add_widget(btn_box)
+        self.add_widget(layout)
 
     def save_word(self, instance):
-        # UTF-8 인코딩으로 단어 저장
         try:
-            with open(STORE_FILE, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-        except: data = {}
-
-        lv = self.inputs['level'].text
-        st = self.inputs['step'].text
-        if lv not in data: data[lv] = {}
-        if st not in data[lv]: data[lv][st] = []
-
-        new_entry = {k: v.text for k, v in self.inputs.items() if k not in ['level', 'step']}
-        data[lv][st].append(new_entry)
+            with open(STORE_FILE, 'r', encoding='utf-8') as f: data = json.load(f)
+        except: data = {"초급": {"1": []}}
+        
+        new_entry = {k: v.text for k, v in self.inputs.items() if k != 'level'}
+        data.setdefault("초급", {}).setdefault("1", []).append(new_entry)
 
         with open(STORE_FILE, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
-        print("단어 저장 완료")
         self.refresh()
 
 class GameScreen(Screen):
-    # [복원 및 신규] 단어 게임 및 발음 공부 화면
     def on_enter(self):
-        self.load_words()
-        self.next_question()
-
-    def load_words(self):
-        global current_word_list
-        # words.json에서 데이터를 불러와서 학습 리스트를 만듭니다.
-        # (실제 앱에서는 선택한 등급/단계에 따라 필터링하는 로직이 필요합니다.)
+        self.clear_widgets()
         try:
             with open(STORE_FILE, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-                # 예시로 '초급'의 '1'단계를 가져옵니다.
-                current_word_list = data.get('초급', {}).get('1', [])
-        except:
-            current_word_list = []
-
-    def next_question(self):
-        self.clear_widgets()
-        if not current_word_list:
-            self.add_widget(Label(text="학습할 단어가 없습니다.\n단어장에서 단어를 추가해주세요.", font_name="Nanum", halign="center"))
-            back_btn = Button(text="메인으로", font_name="Nanum", size_hint=(None, None), size=('120dp', '50dp'), pos_hint={'center_x': 0.5, 'center_y': 0.2})
-            back_btn.bind(on_release=lambda x: setattr(self.manager, 'current', 'menu'))
-            self.add_widget(back_btn)
+                self.words = data.get("초급", {}).get("1", [])
+        except: self.words = []
+        
+        if not self.words:
+            self.add_widget(Label(text="단어가 없습니다.", font_name="Nanum"))
             return
-
-        # 랜덤하게 문제 출제
-        self.question_word = random.choice(current_word_list)
-        target_lang = self.manager.target_lang
-        
-        # 문제 단어 (외국어)
-        self.word_text = self.question_word.get(target_lang, "")
-        
-        main_layout = BoxLayout(orientation='vertical', padding=20, spacing=20)
-        
-        # 상단: 문제 단어 및 발음 버튼
-        top_layout = BoxLayout(size_hint_y=None, height='100dp', spacing=10)
-        top_layout.add_widget(Label(text=self.word_text, font_size='40sp', color=(1,1,1,1))) # 외국어 단어는 기본 폰트(깨짐 주의, font_ttf에 해당 언어가 포함되어야 함)
-        
-        # [신규] 발음 듣기 버튼 추가
-        speak_btn = Button(text="📢 듣기", font_name="Nanum", size_hint_x=None, width='100dp')
-        speak_btn.bind(on_release=self.speak_word)
-        top_layout.add_widget(speak_btn)
-        main_layout.add_widget(top_layout)
-        
-        # 하단: 뜻 입력 및 확인
-        self.answer_input = TextInput(hint_text="한국어 뜻을 입력하세요", font_name="Nanum", multiline=False, size_hint_y=None, height='60dp')
-        main_layout.add_widget(self.answer_input)
-        
-        btn_layout = BoxLayout(size_hint_y=None, height='60dp', spacing=10)
-        check_btn = Button(text="정답 확인", font_name="Nanum", background_color=(0, 0.7, 0, 1))
-        check_btn.bind(on_release=self.check_answer)
-        next_btn = Button(text="다음 단어", font_name="Nanum")
-        next_btn.bind(on_release=lambda x: self.next_question())
-        
-        btn_layout.add_widget(check_btn)
-        btn_layout.add_widget(next_btn)
-        main_layout.add_widget(btn_layout)
-        
-        # 뒤로가기 버튼
-        back_btn = Button(text="학습 종료", font_name="Nanum", size_hint_y=None, height='50dp', background_color=(0.5, 0.5, 0.5, 1))
-        back_btn.bind(on_release=lambda x: setattr(self.manager, 'current', 'menu'))
-        main_layout.add_widget(back_btn)
-
-        self.add_widget(main_layout)
-
-    def speak_word(self, instance):
-        # [신규] 발음하기 기능 구현
-        if android_tts:
-            lang_code = self.manager.target_lang
-            # 안드로이드 TTS 언어 코드 설정 (예: en_US, vi_VN, zh_CN)
-            if lang_code == 'en': android_lang = 'en_US'
-            elif lang_code == 'vi': android_lang = 'vi_VN'
-            elif lang_code == 'zh': android_lang = 'zh_CN'
-            else: android_lang = 'en_US'
             
-            android_tts.speak(self.word_text, android_lang)
-        else:
-            print("발음 기능은 안드로이드 기기에서만 작동합니다.")
-
-    def check_answer(self, instance):
-        user_answer = self.answer_input.text.strip()
-        correct_answer = self.question_word.get('ko', "").strip()
+        self.current_q = random.choice(self.words)
+        layout = BoxLayout(orientation='vertical', padding=20, spacing=20)
         
-        if user_answer == correct_answer:
-            self.answer_input.background_color = (0, 1, 0, 0.2) # 초록색 배경 (정답)
+        # 문제 단어 표시 (선택한 언어)
+        target = self.manager.target_lang
+        layout.add_widget(Label(text=self.current_q.get(target, ""), font_size='40sp'))
+        
+        self.ans = TextInput(hint_text="한국어 뜻 입력", font_name="Nanum", multiline=False)
+        layout.add_widget(self.ans)
+        
+        check = Button(text="정답 확인", font_name="Nanum", size_hint_y=None, height='60dp')
+        check.bind(on_release=self.check_ans)
+        layout.add_widget(check)
+        
+        exit_btn = Button(text="종료", font_name="Nanum", size_hint_y=None, height='50dp')
+        exit_btn.bind(on_release=lambda x: setattr(self.manager, 'current', 'menu'))
+        layout.add_widget(exit_btn)
+        self.add_widget(layout)
+
+    def check_ans(self, instance):
+        if self.ans.text.strip() == self.current_q.get('ko', "").strip():
+            self.ans.text = "정답입니다!"
         else:
-            self.answer_input.background_color = (1, 0, 0, 0.2) # 빨간색 배경 (오답)
-            self.answer_input.text = f"{user_answer} (오답! 정답: {correct_answer})"
+            self.ans.text = f"틀림! 정답: {self.current_q.get('ko')}"
 
 class MyManager(ScreenManager):
-    target_lang = 'en' # 기본 학습 언어
+    target_lang = 'en'
 
 class MainApp(App):
     def build(self):
-        # UTF-8 기반 기본 파일 및 예시 데이터 생성
         if not os.path.exists(STORE_FILE):
-            example_data = {
-                "초급": {
-                    "1": [
-                        {"ko": "안녕하세요", "en": "Hello", "vi": "Xin chào", "zh": "你好"},
-                        {"ko": "감사합니다", "en": "Thank you", "vi": "Cảm ơn", "zh": "谢谢"},
-                        {"ko": "사과", "en": "Apple", "vi": "Quả táo", "zh": "苹果"}
-                    ]
-                }
-            }
             with open(STORE_FILE, 'w', encoding='utf-8') as f:
-                json.dump(example_data, f, ensure_ascii=False, indent=2)
-
+                json.dump({"초급": {"1": [{"ko":"사과", "en":"apple", "vi":"táo"}]}}, f)
         sm = MyManager()
         sm.add_widget(MainMenu(name='menu'))
         sm.add_widget(LangSelect(name='lang_select'))
