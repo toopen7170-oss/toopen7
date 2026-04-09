@@ -1,10 +1,35 @@
+import os
+import sys
 import traceback
+from plyer import share  # 공유 기능을 위해 추가
+
+# --- [최상단] 에러 로그 및 안드로이드 공유 설정 ---
+def logger(type, value, tb):
+    # 1. 임시로 내부 저장소에 로그 기록
+    log_content = "".join(traceback.format_exception(type, value, tb))
+    # 앱 내부 경로에 에러 로그 생성
+    temp_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "error_log.txt")
+    
+    try:
+        with open(temp_path, "w", encoding='utf-8') as f:
+            f.write("--- PT1 Manager Error Log ---\n")
+            f.write(log_content)
+        
+        # 2. 안드로이드 공유 창 띄우기 (다운로드 폴더 저장 및 카톡 전송 가능)
+        share.share(temp_path)
+    except Exception as e:
+        print(f"Log sharing failed: {e}")
+
+# 시스템 예외 발생 시 위 함수 실행
+sys.excepthook = logger
+
+# --- Kivy 앱 로직 시작 ---
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.lang import Builder
 from kivy.properties import StringProperty, ListProperty
 
-# KV 디자인 정의 (한 번에 로드)
+# KV 디자인 정의
 Builder.load_string('''
 <MenuScreen>:
     BoxLayout:
@@ -20,7 +45,6 @@ Builder.load_string('''
             text: "다국어 단어 마스터 2.0"
             font_size: '30sp'
             size_hint_y: 0.6
-            # font_name: 'YourFont.ttf' # 폰트 파일이 있다면 주석 해제
 
         Button:
             text: "학습 시작하기"
@@ -32,7 +56,7 @@ Builder.load_string('''
             text: "단어 관리 (추가/삭제)"
             size_hint_y: 0.2
             background_color: 0.3, 0.3, 0.3, 1
-            # 1번 문제 해결: 정확한 화면 이름 'word_manage' 호출
+            # 1번 문제 해결: 정확한 화면 이름 'word_manage' 매칭
             on_release: root.manager.current = 'word_manage'
 
 <LanguageSelectScreen>:
@@ -59,9 +83,10 @@ Builder.load_string('''
     BoxLayout:
         orientation: 'vertical'
         Label:
-            # 2번 문제 해결: 데이터가 없을 때 표시될 텍스트
+            # 2번 문제 해결: 선택된 언어에 단어가 없을 때 메시지 표시
             text: root.display_text
-            font_size: '20sp'
+            font_size: '18sp'
+            halign: 'center'
         Button:
             text: "메뉴로 돌아가기"
             size_hint_y: 0.2
@@ -71,48 +96,44 @@ Builder.load_string('''
     BoxLayout:
         orientation: 'vertical'
         Label:
-            text: "단어 관리 화면"
+            text: "단어 관리 화면\\n(여기에 단어 추가 로직을 구현하세요)"
+            halign: 'center'
         Button:
             text: "돌아가기"
             size_hint_y: 0.2
             on_release: root.manager.current = 'menu'
 ''')
 
-# 1. 메인 메뉴 화면
 class MenuScreen(Screen):
     pass
 
-# 2. 언어 선택 화면
 class LanguageSelectScreen(Screen):
     def select_lang(self, lang):
         app = App.get_running_app()
         app.target_lang = lang
         
-        # 데이터 존재 여부 확인 로직
+        # 2번 문제 해결: 데이터베이스(word_db)에서 단어 유무 확인
         if lang in app.word_db and app.word_db[lang]:
-            self.manager.get_screen('study').display_text = f"{lang} 학습을 시작합니다."
+            self.manager.get_screen('study').display_text = f"[{lang}] 학습 화면입니다."
         else:
-            # 2번 증상 대응: 데이터가 없을 경우
-            self.manager.get_screen('study').display_text = "학습할 단어가 없습니다.\n관리 화면에서 단어를 추가해주세요."
+            self.manager.get_screen('study').display_text = "학습할 단어가 없습니다.\\n관리 화면에서 단어를 추가해주세요."
         
         self.manager.current = 'study'
 
-# 3. 학습 화면
 class StudyScreen(Screen):
     display_text = StringProperty("")
 
-# 4. 단어 관리 화면 (1번 튕김 현상 방지를 위해 클래스 생성)
 class WordManageScreen(Screen):
     pass
 
 class WordMasterApp(App):
     target_lang = StringProperty("")
-    # 임시 데이터베이스 (실제 구현 시 SQLite 등 연결 가능)
+    # 샘플 데이터베이스 (학습할 단어가 있는지 체크용)
     word_db = ListProperty({"English": ["Apple"], "Vietnamese": [], "Chinese": []})
 
     def build(self):
         sm = ScreenManager()
-        # 모든 화면을 등록해야 튕기지 않습니다.
+        # 모든 Screen 클래스를 등록해야 전환 시 튕기지 않습니다.
         sm.add_widget(MenuScreen(name='menu'))
         sm.add_widget(LanguageSelectScreen(name='language_select'))
         sm.add_widget(StudyScreen(name='study'))
@@ -120,8 +141,4 @@ class WordMasterApp(App):
         return sm
 
 if __name__ == '__main__':
-    try:
-        WordMasterApp().run()
-    except Exception:
-        # 에러 발생 시 로그 출력
-        traceback.print_exc()
+    WordMasterApp().run()
